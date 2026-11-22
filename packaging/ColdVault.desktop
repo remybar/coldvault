@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=ColdVault
+Comment=Préparer et vérifier des archives froides
+Exec=ColdVault
+Terminal=false
+Categories=Utility;Archiving;
