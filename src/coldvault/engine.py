@@ -13,7 +13,7 @@ from pathlib import Path
 from . import io
 from .control import Control
 from .errors import Cancelled, ColdVaultError, Conflict, SourceChanged, UnsafePath
-from .io import Tree, hash_file, media_lock, signature
+from .io import Tree, assert_file_unchanged, hash_file, media_lock
 from .manifest import (
     FORMAT,
     Entry,
@@ -549,10 +549,7 @@ def _transfer(
         outgoing.flush()
         os.fsync(outgoing.fileno())
         after = os.fstat(incoming.fileno())
-        if signature(before) != signature(after) or signature(after) != signature(
-            source.stat(relative)
-        ):
-            raise SourceChanged(f"Source modifiée pendant la copie : {entry.logical_path}")
+        assert_file_unchanged(source, relative, before, after)
         if count != entry.size or digest.hexdigest() != entry.sha256:
             raise SourceChanged(f"Source différente du manifeste : {entry.logical_path}")
     # Relecture distincte du temporaire après fermeture/synchronisation des écritures.

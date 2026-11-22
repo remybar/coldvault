@@ -100,6 +100,10 @@ indépendant et associer des noms physiques aux supports.
 - Windows : caractères/noms réservés, lecteurs variables, jonctions et limites de chemin.
   Les reparse points sont refusés. La résistance aux remplacements concurrents hostiles
   nécessite ultérieurement des handles natifs Windows avec une gestion plus stricte.
+  Les signatures de stabilité sont comparées exclusivement via `fstat`, y compris après
+  réouverture sûre du chemin courant : `stat(path)` et `fstat(fd)` peuvent donner des
+  significations différentes à `st_ctime_ns` ([CPython #157671](https://github.com/python/cpython/issues/157671)).
+  Les contrôles de changement de contenu et d'identité restent actifs pendant lecture et copie.
 - Linux : différences de systèmes de fichiers et disponibilité de `renameat2` ; échec sûr
   si la publication exclusive n'est pas disponible.
 - exFAT : variations de tables de casse, horodatages et absence de journal ; les dates ne

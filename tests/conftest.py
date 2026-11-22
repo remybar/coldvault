@@ -13,7 +13,7 @@ def archive(tmp_path: Path):
     docs.mkdir(parents=True)
     (photos / "été 東京.jpg").write_bytes(b"photographie" * 100)
     (photos / "vide").write_bytes(b"")
-    (docs / "papier.txt").write_text("Contrat\n", encoding="utf-8")
+    (docs / "papier.txt").write_bytes(b"Contrat\n")
     sources = {"Photos": photos, "Documents": docs}
     manifest = create_manifest(sources, "Famille")
     destination = tmp_path / "HDD-A"

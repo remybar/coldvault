@@ -249,11 +249,27 @@ def hash_file(
             if on_chunk:
                 on_chunk(size)
         after = os.fstat(stream.fileno())
-        if signature(before) != signature(after) or signature(after) != signature(tree.stat(path)):
-            raise SourceChanged(f"Fichier modifié pendant la lecture : {path}")
+        assert_file_unchanged(tree, path, before, after)
         if size != before.st_size:
             raise SourceChanged(f"Longueur modifiée pendant la lecture : {path}")
         return digest.hexdigest(), size, before.st_mtime_ns
+
+
+def assert_file_unchanged(
+    tree: Tree, path: str, before: os.stat_result, after: os.stat_result
+) -> None:
+    """Compare des résultats fstat uniquement, y compris pour le nom courant.
+
+    Sous Windows, stat(path).st_ctime_ns peut être la date de création alors que
+    fstat(fd).st_ctime_ns est la date de changement (CPython #157671).
+    La réouverture sûre contrôle aussi l'identité du fichier toujours désigné par
+    le chemin, sans abandonner les contrôles de ctime, mtime, taille ou inode.
+    """
+    if signature(before) != signature(after):
+        raise SourceChanged(f"Fichier modifié pendant la lecture : {path}")
+    with tree.open(path) as current:
+        if signature(after) != signature(os.fstat(current.fileno())):
+            raise SourceChanged(f"Fichier modifié ou remplacé pendant la lecture : {path}")
 
 
 @contextlib.contextmanager
